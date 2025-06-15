@@ -4,12 +4,11 @@ import com.emobile.springtodo.dto.request.ToDoRequestDto;
 import com.emobile.springtodo.dto.response.ToDoResponseDto;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface ToDoService {
-    ToDoResponseDto findById(UUID id);
-    List<ToDoResponseDto> findAll(int limit, int offset);
+    ToDoResponseDto findById(String id);
+    List<ToDoResponseDto> findAll(int pageSize, int pageNumber);
     ToDoResponseDto save(ToDoRequestDto toDoRequestDto);
-    ToDoResponseDto update(ToDoRequestDto toDoRequestDto, UUID id);
-    String delete(UUID id);
+    ToDoResponseDto update(ToDoRequestDto toDoRequestDto, String id);
+    String delete(String id);
 }

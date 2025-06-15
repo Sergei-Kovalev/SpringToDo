@@ -21,15 +21,15 @@ public class ToDoServiceImpl implements ToDoService {
 
 
     @Override
-    public ToDoResponseDto findById(UUID id) {
-        return toDoRepository.findById(id)
+    public ToDoResponseDto findById(String id) {
+        return toDoRepository.findById(UUID.fromString(id))
                 .map(toDoMapper::fromEntityToResponseDto)
-                .orElseThrow(() -> new ToDoNotFoundException(id));
+                .orElseThrow(() -> new ToDoNotFoundException(UUID.fromString(id)));
     }
 
     @Override
-    public List<ToDoResponseDto> findAll(int limit, int offset) {
-        return toDoRepository.findAll(limit, offset)
+    public List<ToDoResponseDto> findAll(int pageSize, int pageNumber) {
+        return toDoRepository.findAll(pageSize, pageNumber)
                 .stream()
                 .map(toDoMapper::fromEntityToResponseDto)
                 .toList();
@@ -43,15 +43,15 @@ public class ToDoServiceImpl implements ToDoService {
     }
 
     @Override
-    public ToDoResponseDto update(ToDoRequestDto toDoRequestDto, UUID id) {
+    public ToDoResponseDto update(ToDoRequestDto toDoRequestDto, String id) {
         ToDo forUpdate = toDoMapper.fromRequestToEntity(toDoRequestDto);
-        ToDo updated = toDoRepository.update(forUpdate, id);
+        ToDo updated = toDoRepository.update(forUpdate, UUID.fromString(id));
         return toDoMapper.fromEntityToResponseDto(updated);
     }
 
     @Override
-    public String delete(UUID id) {
-        toDoRepository.delete(id);
+    public String delete(String id) {
+        toDoRepository.delete(UUID.fromString(id));
         return String.format("ToDo with id: %s was deleted", id);
     }
 }

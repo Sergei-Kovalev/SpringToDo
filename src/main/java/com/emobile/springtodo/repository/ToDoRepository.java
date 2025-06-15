@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface ToDoRepository {
     Optional<ToDo> findById(UUID id);
-    List<ToDo> findAll(int limit, int offset);
+    List<ToDo> findAll(int pageSize, int pageNumber);
     ToDo save(ToDo todo);
     ToDo update(ToDo todo, UUID id);
     void delete(UUID id);

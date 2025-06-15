@@ -35,11 +35,13 @@ public class ToDoRepositoryImpl implements ToDoRepository {
     }
 
     @Override
-    public List<ToDo> findAll(int limit, int offset) {
+    public List<ToDo> findAll(int pageSize, int pageNumber) {
         String query = "SELECT * FROM todos ORDER BY id LIMIT ? OFFSET ?";
 
+        int offset = (pageNumber - 1) * pageSize;
+
         try {
-            return jdbcTemplate.query(query, mapper, limit, offset);
+            return jdbcTemplate.query(query, mapper, pageSize, offset);
         } catch (DataAccessException e) {
             return new ArrayList<>();
         }
