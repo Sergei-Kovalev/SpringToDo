@@ -35,11 +35,11 @@ public class ToDoRepositoryImpl implements ToDoRepository {
     }
 
     @Override
-    public List<ToDo> findAll() {
-        String query = "SELECT * FROM todos";
+    public List<ToDo> findAll(int limit, int offset) {
+        String query = "SELECT * FROM todos ORDER BY id LIMIT ? OFFSET ?";
 
         try {
-            return jdbcTemplate.query(query, mapper);
+            return jdbcTemplate.query(query, mapper, limit, offset);
         } catch (DataAccessException e) {
             return new ArrayList<>();
         }
@@ -84,7 +84,7 @@ public class ToDoRepositoryImpl implements ToDoRepository {
         int rowsAffected = jdbcTemplate.update(sql, todo.getId().toString());
 
         if (rowsAffected == 0) {
-            throw new RuntimeException("ToDo with id " + todo.getId() + " not found for deletion");
+            throw new ToDoNotFoundException(todo.getId());
         }
     }
 }
