@@ -70,7 +70,6 @@ public class ToDoRepositoryImpl implements ToDoRepository {
                                                todo.getExpirationDate(),
                                                todo.isDone(),
                                                id.toString());
-
         if (rowsChanged == 0) {
             throw new ToDoNotFoundException(id);
         }
@@ -78,13 +77,12 @@ public class ToDoRepositoryImpl implements ToDoRepository {
         return todo;    }
 
     @Override
-    public void delete(ToDo todo) {
+    public void delete(UUID id) {
         String sql = "DELETE FROM todos WHERE id = ?";
 
-        int rowsAffected = jdbcTemplate.update(sql, todo.getId().toString());
-
-        if (rowsAffected == 0) {
-            throw new ToDoNotFoundException(todo.getId());
+        int rowsChanged = jdbcTemplate.update(sql, id.toString());
+        if (rowsChanged == 0) {
+            throw new ToDoNotFoundException(id);
         }
     }
 }
