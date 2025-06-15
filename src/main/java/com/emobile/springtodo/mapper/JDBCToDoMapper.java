@@ -18,7 +18,7 @@ public class JDBCToDoMapper implements RowMapper<ToDo> {
                 .id(UUID.fromString(rs.getString("id")))
                 .description(rs.getString("description"))
                 .expirationDate(rs.getObject("expiration_date", LocalDateTime.class))
-                .isDone(rs.getBoolean("is_done"))
+                .done(rs.getBoolean("is_done"))
                 .build();
     }
 }

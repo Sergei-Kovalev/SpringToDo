@@ -16,5 +16,5 @@ public record ToDoRequestDto(
         @FutureOrPresent(message = "Expiration date must be in future")
         LocalDateTime expirationDate,
 
-        boolean isDone) {
+        boolean done) {
 }

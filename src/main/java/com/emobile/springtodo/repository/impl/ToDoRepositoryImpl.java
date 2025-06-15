@@ -25,9 +25,9 @@ public class ToDoRepositoryImpl implements ToDoRepository {
     @Override
     public Optional<ToDo> findById(UUID id) {
         String query = "SELECT * FROM todos WHERE id = ?";
-
+        System.out.println(id);
         try {
-            ToDo toDo = jdbcTemplate.queryForObject(query, mapper, id.toString());
+            ToDo toDo = jdbcTemplate.queryForObject(query, mapper, id);
             return Optional.ofNullable(toDo);
         } catch (DataAccessException e) {
             return Optional.empty();
@@ -56,7 +56,7 @@ public class ToDoRepositoryImpl implements ToDoRepository {
         String query = "INSERT INTO todos (id, description, expiration_date, is_done) VALUES (?, ?, ?, ?)";
 
         jdbcTemplate.update(query,
-                            todo.getId().toString(),
+                            todo.getId(),
                             todo.getDescription(),
                             todo.getExpirationDate(),
                             todo.isDone());
@@ -71,18 +71,19 @@ public class ToDoRepositoryImpl implements ToDoRepository {
                                                todo.getDescription(),
                                                todo.getExpirationDate(),
                                                todo.isDone(),
-                                               id.toString());
+                                               id);
         if (rowsChanged == 0) {
             throw new ToDoNotFoundException(id);
         }
-
-        return todo;    }
+        todo.setId(id);
+        return todo;
+    }
 
     @Override
     public void delete(UUID id) {
         String sql = "DELETE FROM todos WHERE id = ?";
 
-        int rowsChanged = jdbcTemplate.update(sql, id.toString());
+        int rowsChanged = jdbcTemplate.update(sql, id);
         if (rowsChanged == 0) {
             throw new ToDoNotFoundException(id);
         }

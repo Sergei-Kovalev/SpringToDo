@@ -33,5 +33,5 @@ public class ToDo {
     private LocalDateTime expirationDate;
 
     @Column(name = "is_done")
-    private boolean isDone;
+    private boolean done;
 }

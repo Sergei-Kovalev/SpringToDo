@@ -38,7 +38,7 @@ public class ToDoController {
     }
 
     @PostMapping
-    public ToDoResponseDto save(@RequestBody ToDoRequestDto requestDto) {
+    public ToDoResponseDto save(@RequestBody @Validated ToDoRequestDto requestDto) {
         return toDoService.save(requestDto);
     }
 

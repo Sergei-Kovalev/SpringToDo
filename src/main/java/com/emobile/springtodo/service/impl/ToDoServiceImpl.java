@@ -52,6 +52,6 @@ public class ToDoServiceImpl implements ToDoService {
     @Override
     public String delete(String id) {
         toDoRepository.delete(UUID.fromString(id));
-        return String.format("ToDo with id: %s was deleted", id);
+        return String.format("ToDo with id: %s has been deleted", id);
     }
 }

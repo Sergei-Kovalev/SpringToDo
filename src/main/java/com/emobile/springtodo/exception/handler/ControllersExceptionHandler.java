@@ -1,6 +1,7 @@
 package com.emobile.springtodo.exception.handler;
 
 import com.emobile.springtodo.exception.ToDoNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,8 @@ public class ControllersExceptionHandler {
 
     @ExceptionHandler({
             IllegalArgumentException.class,
-            HttpMessageNotReadableException.class})
+            HttpMessageNotReadableException.class,
+            ConstraintViolationException.class})
     public ResponseEntity<CustomErrorResponse> handleIllegalArgumentException(Exception e, WebRequest request) {
         CustomErrorResponse errorResponse = new CustomErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST, request);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);

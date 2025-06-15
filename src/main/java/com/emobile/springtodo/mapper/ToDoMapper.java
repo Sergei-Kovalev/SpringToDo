@@ -4,10 +4,14 @@ import com.emobile.springtodo.dto.request.ToDoRequestDto;
 import com.emobile.springtodo.dto.response.ToDoResponseDto;
 import com.emobile.springtodo.entity.ToDo;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ToDoMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "done", target = "done")
     ToDo fromRequestToEntity(ToDoRequestDto toDoRequestDto);
 
+    @Mapping(source = "done", target = "done")
     ToDoResponseDto fromEntityToResponseDto(ToDo toDo);
 }

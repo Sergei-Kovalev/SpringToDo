@@ -7,5 +7,5 @@ public record ToDoResponseDto(
         UUID id,
         String description,
         LocalDateTime expirationDate,
-        boolean isDone) {
+        boolean done) {
 }
