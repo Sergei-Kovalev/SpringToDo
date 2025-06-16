@@ -11,6 +11,9 @@ spring:
     hikari:
       schema: public
 
+  autoconfigure:
+    exclude:
+
   jpa:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -30,3 +33,24 @@ spring:
       jedis:
         pool:
           time-between-eviction-runs: 10m
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: SpringToDo
+    version: 1.0.0
+    description: week3 1st task

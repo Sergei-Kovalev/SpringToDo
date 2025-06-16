@@ -12,4 +12,5 @@ public interface ToDoRepository {
     ToDo save(ToDo todo);
     ToDo update(ToDo todo, UUID id);
     void delete(UUID id);
+    int countByDone(boolean done);
 }

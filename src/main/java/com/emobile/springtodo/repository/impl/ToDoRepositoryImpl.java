@@ -87,4 +87,15 @@ public class ToDoRepositoryImpl implements ToDoRepository {
             throw new ToDoNotFoundException(id);
         }
     }
+
+    @Override
+    public int countByDone(boolean done) {
+        String query = "SELECT COUNT(*) FROM todos WHERE is_done = ?";
+        try {
+            Integer count = jdbcTemplate.queryForObject(query, Integer.class, done);
+            return count != null ? count : 0;
+        } catch (DataAccessException e) {
+            return 0;
+        }
+    }
 }

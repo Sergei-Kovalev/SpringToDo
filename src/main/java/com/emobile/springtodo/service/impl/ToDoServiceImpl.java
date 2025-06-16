@@ -23,7 +23,6 @@ public class ToDoServiceImpl implements ToDoService {
     private final ToDoRepository toDoRepository;
     private final ToDoMapper toDoMapper;
 
-
     @Override
     @Cacheable(value = "todos", key = "#id")
     public ToDoResponseDto findById(String id) {

@@ -3,6 +3,7 @@ package com.emobile.springtodo.controller;
 import com.emobile.springtodo.dto.request.ToDoRequestDto;
 import com.emobile.springtodo.dto.response.ToDoResponseDto;
 import com.emobile.springtodo.service.ToDoService;
+import com.emobile.springtodo.swagger.IToDoController;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
@@ -20,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@Validated
 @RequestMapping("/todo")
 @RequiredArgsConstructor
-public class ToDoController {
+@Validated
+public class ToDoController implements IToDoController {
     private final ToDoService toDoService;
 
     @GetMapping("/{id}")
