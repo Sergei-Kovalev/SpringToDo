@@ -25,7 +25,6 @@ public class ToDoRepositoryImpl implements ToDoRepository {
     @Override
     public Optional<ToDo> findById(UUID id) {
         String query = "SELECT * FROM todos WHERE id = ?";
-        System.out.println(id);
         try {
             ToDo toDo = jdbcTemplate.queryForObject(query, mapper, id);
             return Optional.ofNullable(toDo);
