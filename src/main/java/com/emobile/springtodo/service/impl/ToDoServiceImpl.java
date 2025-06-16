@@ -8,6 +8,10 @@ import com.emobile.springtodo.mapper.ToDoMapper;
 import com.emobile.springtodo.repository.ToDoRepository;
 import com.emobile.springtodo.service.ToDoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +25,7 @@ public class ToDoServiceImpl implements ToDoService {
 
 
     @Override
+    @Cacheable(value = "todos", key = "#id")
     public ToDoResponseDto findById(String id) {
         return toDoRepository.findById(UUID.fromString(id))
                 .map(toDoMapper::fromEntityToResponseDto)
@@ -28,6 +33,7 @@ public class ToDoServiceImpl implements ToDoService {
     }
 
     @Override
+    @Cacheable(value = "todosList", key = "'pageSize:' + #pageSize + ':pageNumber:' + #pageNumber")
     public List<ToDoResponseDto> findAll(int pageSize, int pageNumber) {
         return toDoRepository.findAll(pageSize, pageNumber)
                 .stream()
@@ -36,6 +42,8 @@ public class ToDoServiceImpl implements ToDoService {
     }
 
     @Override
+    @CachePut(value = "todos", key = "#result.id")
+    @CacheEvict(value = "todosList", allEntries = true)
     public ToDoResponseDto save(ToDoRequestDto toDoRequestDto) {
         ToDo forSave = toDoMapper.fromRequestToEntity(toDoRequestDto);
         ToDo saved = toDoRepository.save(forSave);
@@ -43,6 +51,8 @@ public class ToDoServiceImpl implements ToDoService {
     }
 
     @Override
+    @CachePut(value = "todos", key = "#result.id")
+    @CacheEvict(value = "todosList", allEntries = true)
     public ToDoResponseDto update(ToDoRequestDto toDoRequestDto, String id) {
         ToDo forUpdate = toDoMapper.fromRequestToEntity(toDoRequestDto);
         ToDo updated = toDoRepository.update(forUpdate, UUID.fromString(id));
@@ -50,6 +60,10 @@ public class ToDoServiceImpl implements ToDoService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "todos", key = "#id"),
+            @CacheEvict(value = "todosList", allEntries = true)
+    })
     public String delete(String id) {
         toDoRepository.delete(UUID.fromString(id));
         return String.format("ToDo with id: %s has been deleted", id);
