@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @Sql({"/todo-data-init.sql"})
-public class ToDoControllerIntegrationTest {
+class ToDoControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -57,7 +57,7 @@ public class ToDoControllerIntegrationTest {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
         try (RedisConnection connection = redisConnectionFactory.getConnection()) {
-            connection.flushAll();
+            connection.execute("FLUSHDB");
         }
     }
 

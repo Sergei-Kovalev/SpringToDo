@@ -183,7 +183,9 @@ class ToDoServiceImplTest {
         doThrow(new ToDoNotFoundException(UUID.fromString(id)))
                 .when(repository).delete(any(UUID.class));
 
-        assertThatThrownBy(() -> repository.delete(UUID.fromString(id)))
+        UUID uuid = UUID.fromString(id);
+
+        assertThatThrownBy(() -> repository.delete(uuid))
                 .isInstanceOf(ToDoNotFoundException.class)
                 .hasMessageContaining(String.format("ToDo with id %s not found", id));
 

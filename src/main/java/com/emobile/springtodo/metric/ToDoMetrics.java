@@ -7,12 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ToDoMetrics {
-    private final MeterRegistry meterRegistry;
-    private final ToDoRepository toDoRepository;
 
     public ToDoMetrics(MeterRegistry meterRegistry, ToDoRepository toDoRepository) {
-        this.meterRegistry = meterRegistry;
-        this.toDoRepository = toDoRepository;
 
         Gauge.builder("todo.tasks.done.count",
                       () -> toDoRepository.countByDone(true))  // Предполагается, что такой метод есть в репозитории
