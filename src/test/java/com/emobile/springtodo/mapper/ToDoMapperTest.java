@@ -61,4 +61,16 @@ class ToDoMapperTest {
 
         assertThat(actual).isEqualTo(responseDto);
     }
+
+    @Test
+    @DisplayName("sould update Entity with responseDto")
+    void updateEntityFromRequest() {
+        ToDo toDoBefore = ToDo.builder()
+                .id(todo.getId())
+                .build();
+
+        mapper.updateEntityFromRequest(requestDto, toDoBefore);
+
+        assertThat(toDoBefore).isEqualTo(todo);
+    }
 }

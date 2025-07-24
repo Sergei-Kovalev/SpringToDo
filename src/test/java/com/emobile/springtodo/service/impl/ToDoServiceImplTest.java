@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -101,7 +101,7 @@ class ToDoServiceImplTest {
         int pageSize = 5, pageNumber = 1;
         List<ToDo> toDos = List.of(todo, todo, todo);
 
-        when(repository.findAll(pageSize, pageNumber))
+        when(repository.findAllByOrderById(any(Pageable.class)))
                 .thenReturn(toDos);
         when(mapper.fromEntityToResponseDto(any(ToDo.class)))
                 .thenReturn(responseDto);
@@ -135,10 +135,11 @@ class ToDoServiceImplTest {
     @Test
     @DisplayName("should update an existing ToDo when present")
     void update_whenPresent() {
-        when(mapper.fromRequestToEntity(any(ToDoRequestDto.class)))
-                .thenReturn(todo);
-        when(repository.update(any(ToDo.class), any(UUID.class)))
-                .thenReturn(todo);
+        when(repository.findById(any()))
+                .thenReturn(Optional.of(todo));
+        doNothing()
+                .when(mapper)
+                .updateEntityFromRequest(any(ToDoRequestDto.class), any(ToDo.class));
         when(mapper.fromEntityToResponseDto(todo))
                 .thenReturn(responseDto);
 
@@ -146,49 +147,36 @@ class ToDoServiceImplTest {
 
         assertThat(actual).isEqualTo(responseDto);
 
-        verify(mapper, times(1)).fromRequestToEntity(any(ToDoRequestDto.class));
-        verify(mapper, times(1)).fromEntityToResponseDto(any(ToDo.class));
+        verify(repository, times(1)).findById(UUID.fromString(id));
+        verify(mapper, times(1)).updateEntityFromRequest(requestDto, todo);
+        verify(mapper, times(1)).fromEntityToResponseDto(todo);
+
+        verify(repository, never()).save(any());
     }
 
     @Test
     @DisplayName("should throw ToDoNotFoundException when updating a non-existent ToDo")
     void update_whenNotPresent() {
-        when(mapper.fromRequestToEntity(any(ToDoRequestDto.class)))
-                .thenReturn(todo);
-        when(repository.update(any(ToDo.class), any(UUID.class)))
-                .thenThrow(new ToDoNotFoundException(UUID.fromString(id)));
+        when(repository.findById(any()))
+                .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.update(requestDto, id))
                 .isInstanceOf(ToDoNotFoundException.class)
                 .hasMessageContaining(String.format("ToDo with id %s not found", id));
 
-        verify(mapper, times(1)).fromRequestToEntity(any(ToDoRequestDto.class));
-        verify(mapper, never()).fromEntityToResponseDto(any(ToDo.class));
+        verify(repository, times(1)).findById(any(UUID.class));
+        verify(mapper, never()).updateEntityFromRequest(any(), any());
+        verify(mapper, never()).fromEntityToResponseDto(any());
     }
 
     @Test
     @DisplayName("should delete ToDo by ID when present")
     void delete_whenPresent() {
-        doNothing().when(repository).delete(any(UUID.class));
+        doNothing().when(repository).deleteById(any(UUID.class));
 
         String actual = service.delete(id);
 
         assertThat(actual).isEqualTo(String.format("ToDo with id: %s has been deleted", id));
-        verify(repository, times(1)).delete(any(UUID.class));
-    }
-
-    @Test
-    @DisplayName("should throw ToDoNotFoundException when deleting a non-existent ToDo")
-    void delete_whenNotPresent() {
-        doThrow(new ToDoNotFoundException(UUID.fromString(id)))
-                .when(repository).delete(any(UUID.class));
-
-        UUID uuid = UUID.fromString(id);
-
-        assertThatThrownBy(() -> repository.delete(uuid))
-                .isInstanceOf(ToDoNotFoundException.class)
-                .hasMessageContaining(String.format("ToDo with id %s not found", id));
-
-        verify(repository, times(1)).delete(any(UUID.class));
+        verify(repository, times(1)).deleteById(any(UUID.class));
     }
 }

@@ -225,23 +225,4 @@ class ToDoControllerIntegrationTest {
 
         assertThat(response).isEqualTo(expectedMessage);
     }
-
-    @Test
-    @DisplayName("should return error of deleting todo when id not present in db")
-    void delete_whenNotPresent() throws Exception {
-        String id = "859b3265-ccc7-4480-bb9a-cf1c7026ed39";
-
-        String expectedJson = """
-                {
-                    "status":404,
-                    "error":"ToDo with id 859b3265-ccc7-4480-bb9a-cf1c7026ed39 not found",
-                    "path":"/todo/859b3265-ccc7-4480-bb9a-cf1c7026ed39"
-                }""";
-
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.delete("/todo/{id}", id))
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        JSONAssert.assertEquals(expectedJson, result.getResponse().getContentAsString(), false);
-    }
 }
