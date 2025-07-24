@@ -2,14 +2,12 @@ package com.emobile.springtodo.repository.impl;
 
 import com.emobile.springtodo.entity.ToDo;
 import com.emobile.springtodo.exception.ToDoNotFoundException;
-import com.emobile.springtodo.mapper.JDBCToDoMapper;
 import com.emobile.springtodo.repository.ToDoRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,84 +16,62 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ToDoRepositoryImpl implements ToDoRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final JDBCToDoMapper mapper;
-
+    private final EntityManager entityManager;
 
     @Override
     public Optional<ToDo> findById(UUID id) {
-        String query = "SELECT * FROM todos WHERE id = ?";
-        try {
-            ToDo toDo = jdbcTemplate.queryForObject(query, mapper, id);
-            return Optional.ofNullable(toDo);
-        } catch (DataAccessException e) {
-            return Optional.empty();
-        }
+        ToDo todo = entityManager.find(ToDo.class, id);
+        return Optional.ofNullable(todo);
     }
 
     @Override
     public List<ToDo> findAll(int pageSize, int pageNumber) {
-        String query = "SELECT * FROM todos ORDER BY id LIMIT ? OFFSET ?";
-
-        int offset = (pageNumber - 1) * pageSize;
-
-        try {
-            return jdbcTemplate.query(query, mapper, pageSize, offset);
-        } catch (DataAccessException e) {
-            return new ArrayList<>();
-        }
+        String jpql = "SELECT t FROM ToDo t ORDER BY t.id";
+        return entityManager.createQuery(jpql, ToDo.class)
+                .setFirstResult((pageNumber - 1) * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
     }
 
+    @Transactional
     @Override
     public ToDo save(ToDo todo) {
         if (todo.getId() == null) {
-            todo.setId(UUID.randomUUID());
+            entityManager.persist(todo);
+            return todo;
+        } else {
+            return entityManager.merge(todo);
         }
-
-        String query = "INSERT INTO todos (id, description, expiration_date, is_done) VALUES (?, ?, ?, ?)";
-
-        jdbcTemplate.update(query,
-                            todo.getId(),
-                            todo.getDescription(),
-                            todo.getExpirationDate(),
-                            todo.isDone());
-        return todo;
     }
 
+    @Transactional
     @Override
     public ToDo update(ToDo todo, UUID id) {
-        String sql = "UPDATE todos SET description = ?, expiration_date = ?, is_done = ? WHERE id = ?";
-
-        int rowsChanged = jdbcTemplate.update(sql,
-                                               todo.getDescription(),
-                                               todo.getExpirationDate(),
-                                               todo.isDone(),
-                                               id);
-        if (rowsChanged == 0) {
+        ToDo toDoFromDb = entityManager.find(ToDo.class, id);
+        if (toDoFromDb == null) {
             throw new ToDoNotFoundException(id);
         }
-        todo.setId(id);
-        return todo;
+        toDoFromDb.setDescription(todo.getDescription());
+        toDoFromDb.setExpirationDate(todo.getExpirationDate());
+        toDoFromDb.setDone(todo.isDone());
+        return entityManager.merge(toDoFromDb);
     }
 
     @Override
     public void delete(UUID id) {
-        String sql = "DELETE FROM todos WHERE id = ?";
-
-        int rowsChanged = jdbcTemplate.update(sql, id);
-        if (rowsChanged == 0) {
+        ToDo toDo = entityManager.find(ToDo.class, id);
+        if (toDo == null) {
             throw new ToDoNotFoundException(id);
         }
+        entityManager.remove(toDo);
     }
 
     @Override
     public int countByDone(boolean done) {
-        String query = "SELECT COUNT(*) FROM todos WHERE is_done = ?";
-        try {
-            Integer count = jdbcTemplate.queryForObject(query, Integer.class, done);
-            return count != null ? count : 0;
-        } catch (DataAccessException e) {
-            return 0;
-        }
+        String jpql = "SELECT COUNT(t) FROM ToDo t WHERE t.done = :done";
+        Long count = entityManager.createQuery(jpql, Long.class)
+                .setParameter("done", done)
+                .getSingleResult();
+        return count != null ? count.intValue() : 0;
     }
 }
