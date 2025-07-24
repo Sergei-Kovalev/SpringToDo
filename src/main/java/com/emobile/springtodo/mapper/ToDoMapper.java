@@ -5,6 +5,7 @@ import com.emobile.springtodo.dto.response.ToDoResponseDto;
 import com.emobile.springtodo.entity.ToDo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ToDoMapper {
@@ -14,4 +15,6 @@ public interface ToDoMapper {
 
     @Mapping(source = "done", target = "done")
     ToDoResponseDto fromEntityToResponseDto(ToDo toDo);
+
+    void updateEntityFromRequest(ToDoRequestDto dto, @MappingTarget ToDo entity);
 }
