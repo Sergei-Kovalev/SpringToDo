@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/todos_db
-#    url: jdbc:postgresql://PostgreSQL:5432/socks_db
+#    url: jdbc:postgresql://localhost:5432/todos_db
+    url: jdbc:postgresql://PostgreSQL:5432/todos_db
     username: postgres
     password: postgres
     hikari:
