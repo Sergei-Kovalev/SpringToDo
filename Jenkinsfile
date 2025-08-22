@@ -1,9 +1,9 @@
 pipeline {
     agent {
-        dockerfile {
-            filename 'Dockerfile'
-            dir '.'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+        docker {
+            image 'maven:3.8.6-openjdk-11'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.m2:/root/.m2'
+            reuseNode true
         }
     }
 
@@ -11,16 +11,20 @@ pipeline {
         REGISTRY = 'docker.io'
         DOCKER_HUB_USER = 'mapxyz007'
         IMAGE_NAME = "${REGISTRY}/${DOCKER_HUB_USER}/todo-app"
-        IMAGE_TAG = env.BRANCH_NAME == 'master' ? "latest-${env.BUILD_NUMBER}" : "pr-${env.CHANGE_ID}"
     }
 
     stages {
         stage('Build and Test') {
-            when {
-                not { branch 'master' }
-            }
             steps {
                 sh 'mvn clean install -DskipTests=false'
+            }
+            when {
+                anyOf {
+                    branch 'master'
+                    branch 'dev'
+                    changeRequest target: 'master'
+                    changeRequest target: 'dev'
+                }
             }
         }
 
@@ -30,9 +34,13 @@ pipeline {
             }
             steps {
                 script {
-                    docker.withRegistry("https://${REGISTRY}", 'DockerHubcred') {
-                        def dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                    def IMAGE_TAG = "build-${env.BUILD_NUMBER}"
+                    def IMAGE_NAME_FULL = "${env.IMAGE_NAME}:${IMAGE_TAG}"
+
+                    docker.withRegistry("https://${env.REGISTRY}", 'DockerHubcred') {
+                        def dockerImage = docker.build(IMAGE_NAME_FULL)
                         dockerImage.push()
+                        dockerImage.push('latest')
                     }
                 }
             }
