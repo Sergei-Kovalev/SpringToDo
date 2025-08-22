@@ -1,0 +1,13 @@
+# Build
+FROM maven:3.9.4-eclipse-temurin-17-alpine AS builder
+WORKDIR /usr/src/tmp
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Package
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=builder /usr/src/tmp/target/demo*.jar /app/todo.jar
+EXPOSE 9009
+ENTRYPOINT ["java", "-jar", "/app/todo.jar"]
