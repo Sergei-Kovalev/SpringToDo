@@ -30,7 +30,7 @@ pipeline {
             }
             steps {
                 script {
-                    docker.withRegistry("https://${REGISTRY}", 'Docker Hub cred') {
+                    docker.withRegistry("https://${REGISTRY}", 'DockerHubcred') {
                         def dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
                         dockerImage.push()
                     }
