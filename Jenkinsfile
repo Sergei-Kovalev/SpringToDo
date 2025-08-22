@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.4-eclipse-temurin-17-alpine'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.m2:/root/.m2'
-            reuseNode true
-        }
-    }
+    agent any
 
     environment {
         REGISTRY = 'docker.io'
@@ -16,7 +10,7 @@ pipeline {
     stages {
         stage('Build and Test') {
             steps {
-                sh 'mvn clean install -DskipTests=false'
+                bat 'mvn clean install -DskipTests=false'
             }
             when {
                 anyOf {
@@ -37,10 +31,19 @@ pipeline {
                     def IMAGE_TAG = "build-${env.BUILD_NUMBER}"
                     def IMAGE_NAME_FULL = "${env.IMAGE_NAME}:${IMAGE_TAG}"
 
-                    docker.withRegistry("https://${env.REGISTRY}", 'DockerHubcred') {
-                        def dockerImage = docker.build(IMAGE_NAME_FULL)
-                        dockerImage.push()
-                        dockerImage.push('latest')
+                    bat "docker build -t ${IMAGE_NAME_FULL} ."
+
+                    withCredentials([usernamePassword(
+                        credentialsId: 'DockerHubcred',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        bat """
+                            echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin %REGISTRY%
+                            docker push ${IMAGE_NAME_FULL}
+                            docker tag ${IMAGE_NAME_FULL} ${env.IMAGE_NAME}:latest
+                            docker push ${env.IMAGE_NAME}:latest
+                        """
                     }
                 }
             }
